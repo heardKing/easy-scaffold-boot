@@ -1,0 +1,4 @@
+debug: true #记录日志为debug级别
+
+log:
+  dir: D:\\tmp
