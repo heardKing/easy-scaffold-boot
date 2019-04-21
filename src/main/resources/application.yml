@@ -1,10 +1,20 @@
+# 服务端口配置
+server:
+  servlet:
+    context-path: /
+
 spring:
+  # 当前使用的profile
+  profiles:
+    active: dev
+# springmvc jsp目录配置
   mvc:
     view:
       prefix: /WEB-INF/jsp/
       suffix: .jsp
-    static-path-pattern: /static/**
-  profiles:
-    active: dev
-application:
-  message: hello word
+  # http 编码配置
+  http:
+    encoding:
+      force: true
+      charset: utf-8
+      enabled: true

@@ -2,6 +2,9 @@
 
 <configuration debug="false">
 
+    <!--日志格式应用spring boot默认的格式，也可以自己更改-->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
     <!--定义日志存放的位置-->
     <springProperty scope="context" name="log.dir" source="log.dir"
                     defaultValue="D:\\tmp"/>
@@ -13,7 +16,7 @@
         <!-- 控制台 -->
         <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
             <encoder>
-                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger - %msg%n</pattern>
+                <pattern>${CONSOLE_LOG_PATTERN}</pattern>
             </encoder>
         </appender>
 

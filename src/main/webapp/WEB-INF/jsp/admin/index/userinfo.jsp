@@ -7,7 +7,7 @@
             <ul class="nav btn-group">
                 <li class="btn">
                     <a class="btn-view-info" data-toggle="tooltip" data-placement="bottom" title="点击查看个人资料">
-                        <%--<sys:showLoginUsername/>--%>，欢迎您！
+                        <sys:showLoginUsername/>，欢迎您！
                     </a>
                 </li>
                 <li class="btn" data-toggle="tooltip" data-placement="bottom" title="我的通知">

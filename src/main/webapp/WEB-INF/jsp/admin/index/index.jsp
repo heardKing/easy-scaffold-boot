@@ -32,15 +32,12 @@
 
     </div>
 
-   <iframe id="iframe-tabs-0" tabs="true" class="ui-layout-center"
+    <iframe id="iframe-tabs-0" tabs="true" class="ui-layout-center"
             frameborder="0" scrolling="auto" src="${ctx}/admin/welcome"></iframe>
-
     <%@include file="userinfo.jsp"%>
-
     <div class="ui-layout-north index-header">
         <%@include file="header.jsp"%>
     </div>
-
 
     <div class="ui-layout-south">
         <%@include file="footer.jsp"%>

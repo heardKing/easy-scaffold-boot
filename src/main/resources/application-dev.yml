@@ -2,3 +2,12 @@ debug: true #记录日志为debug级别
 
 log:
   dir: D:\\tmp
+
+application:
+  message: hello word
+
+server:
+  servlet:
+    jsp:
+      init-parameters:
+        development: true
