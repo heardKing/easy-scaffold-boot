@@ -18,19 +18,15 @@ spring:
       force: true
       charset: utf-8
       enabled: true
+  cache:
+    type: ehcache
+    ehcache:
+      config: classpath:ehcache/ehcache_es.xml
 
 # Shiro
 shiro:
-  uid:
-    cookie:
-      name: uid
-      # 默认uid cookie 浏览器关闭后销毁
-      maxAge: -1
-    rememeberMe:
-      cookie:
-        name: rememberMe
-        #默认 rememberMe cookie 60 * 60 * 24 * 7 （7天）
-        maxAge: 604800
-  active:
-    session:
-      cacheName: shiro-activeSessionCache
+  # 允许shiro管理session
+  userNativeSessionManager: true
+  sessionManager:
+    # 禁用URL会话重写
+    sessionIdUrlRewritingEnabled: false

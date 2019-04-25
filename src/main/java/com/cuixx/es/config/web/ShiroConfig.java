@@ -1,14 +1,14 @@
 package com.cuixx.es.config.web;
 
 import com.cuixx.es.shiro.realm.UserRealm;
-import com.cuixx.es.shiro.session.OnlineSessionDAO;
-import org.apache.shiro.session.mgt.eis.JavaUuidSessionIdGenerator;
-import org.apache.shiro.session.mgt.eis.SessionIdGenerator;
-import org.apache.shiro.web.servlet.Cookie;
-import org.apache.shiro.web.servlet.SimpleCookie;
-import org.springframework.beans.factory.annotation.Value;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.realm.Realm;
+import org.apache.shiro.spring.web.config.DefaultShiroFilterChainDefinition;
+import org.apache.shiro.spring.web.config.ShiroFilterChainDefinition;
+import org.apache.shiro.subject.Subject;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.bind.annotation.ModelAttribute;
 
 /**
  * shiro权限管理配置
@@ -16,55 +16,24 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ShiroConfig {
 
-    /**
-     * 项目自定义的Realm
-     */
     @Bean
-    public UserRealm shiroDbRealm() {
-        UserRealm userRealm = new UserRealm();
-        //用切面缓存代理了 此处就不缓存了
-        userRealm.setAuthenticationCachingEnabled(false);
-        userRealm.setAuthorizationCachingEnabled(false);
-        return userRealm;
+    public Realm realm() {
+        UserRealm realm = new UserRealm();
+        realm.setCachingEnabled(true);
+        return realm;
     }
 
     @Bean
-    public SessionIdGenerator sessionIdGenerator(){
-        return new JavaUuidSessionIdGenerator();
+    public ShiroFilterChainDefinition shiroFilterChainDefinition() {
+        DefaultShiroFilterChainDefinition chainDefinition = new DefaultShiroFilterChainDefinition();
+        chainDefinition.addPathDefinition("/login.html", "authc"); // need to accept POSTs from the login form
+        chainDefinition.addPathDefinition("/logout", "logout");
+        return chainDefinition;
     }
 
-    @Value("${shiro.uid.cookie.name}")
-    private String cookieName;
-    @Value("${shiro.uid.cookie.maxAge}")
-    private int cookieMaxAge;
-    @Bean
-    public Cookie sessionIdCookie(){
-        SimpleCookie simpleCookie = new SimpleCookie(cookieName);
-        simpleCookie.setHttpOnly(true);
-        simpleCookie.setMaxAge(cookieMaxAge);
-        return simpleCookie;
-    }
-
-    @Value("${shiro.uid.rememeberMe.cookie.name}")
-    private String rememeberName;
-    @Value("${shiro.uid.rememeberMe.cookie.maxAge}")
-    private int rememeberMaxAge;
-    @Bean
-    public SimpleCookie rememberMeCookie() {
-        SimpleCookie simpleCookie = new SimpleCookie(rememeberName);
-        simpleCookie.setHttpOnly(true);
-        simpleCookie.setMaxAge(rememeberMaxAge);//7天
-        return simpleCookie;
-    }
-
-    @Value("${shiro.active.session.cacheName}")
-    private String activeSessionsCacheName;
-    @Bean
-    public OnlineSessionDAO onlineSessionDAO(SessionIdGenerator sessionIdGenerator){
-        OnlineSessionDAO onlineSessionDAO = new OnlineSessionDAO();
-        onlineSessionDAO.setSessionIdGenerator(sessionIdGenerator);
-        onlineSessionDAO.setActiveSessionsCacheName(activeSessionsCacheName);
-        return onlineSessionDAO;
+    @ModelAttribute(name = "subject")
+    public Subject subject() {
+        return SecurityUtils.getSubject();
     }
 
 }
