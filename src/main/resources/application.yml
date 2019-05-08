@@ -7,7 +7,7 @@ spring:
   # 当前使用的profile
   profiles:
     active: dev
-# springmvc jsp目录配置
+  # springmvc jsp目录配置
   mvc:
     view:
       prefix: /WEB-INF/jsp/
@@ -22,6 +22,16 @@ spring:
     type: ehcache
     ehcache:
       config: classpath:ehcache/ehcache_es.xml
+  devtools:
+    restart:
+      #热部署生效
+      enabled: true
+      #设置重启的目录
+      additional-paths: WEB-INF/jsp/**
+      #该目录下的内容修改不重启
+      exclude: data/**
+  messages:
+    basename: classpath:messages/messages,classpath:messages/ValidationMessages
 
 # Shiro
 shiro:
@@ -30,3 +40,27 @@ shiro:
   sessionManager:
     # 禁用URL会话重写
     sessionIdUrlRewritingEnabled: false
+  # 登录页
+  loginUrl: /login
+  successUrl: /
+  unauthorizedUrl: /global/error
+
+###################### mybatis-plus默认配置 #######################
+mybatis-plus:
+  mapper-locations: classpath:com/cuixx/es/**/dao/mapping/*.xml
+  global-config:
+    db-config:
+      # 0:数据库ID自增   1:用户输入id  2:全局唯一id(IdWorker)  3:全局唯一ID(uuid)
+      id-type: auto
+      logic-delete-value: 0
+      logic-not-delete-value: 1
+  configuration:
+    map-underscore-to-camel-case: false
+    #配置的缓存的全局开关
+    cache-enabled: true
+    # 延时加载的开关
+    lazyLoadingEnabled: true
+    # 开启的话，延时加载一个属性时会加载该对象全部属性，否则按需加载属性
+    multipleResultSetsEnabled: true
+    # 打印sql语句,调试用
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

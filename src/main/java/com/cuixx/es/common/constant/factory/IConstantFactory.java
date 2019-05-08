@@ -2,6 +2,8 @@ package com.cuixx.es.common.constant.factory;
 
 //import com.stylefeng.guns.modular.system.model.Dict;
 
+import com.cuixx.es.sys.permission.entity.Dict;
+
 import java.util.List;
 
 /**
@@ -84,10 +86,10 @@ public interface IConstantFactory {
      */
     String getMenuStatusName(Integer status);
 
-//    /**
-//     * 查询字典
-//     */
-//    List<Dict> findInDict(Integer id);
+    /**
+     * 查询字典
+     */
+    List<Dict> findInDict(Integer id);
 
     /**
      * 获取被缓存的对象(用户删除业务)

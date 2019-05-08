@@ -1,13 +1,25 @@
 package com.cuixx.es.common.constant.factory;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.cuixx.es.common.constant.cache.Cache;
 import com.cuixx.es.common.constant.cache.CacheKey;
+import com.cuixx.es.common.log.LogObjectHolder;
+import com.cuixx.es.common.constant.state.ManagerStatus;
+import com.cuixx.es.common.constant.state.MenuStatus;
 import com.cuixx.es.common.utils.Convert;
 import com.cuixx.es.common.utils.SpringContextHolder;
 import com.cuixx.es.common.utils.StrKit;
 import com.cuixx.es.common.utils.ToolUtil;
+import com.cuixx.es.personal.message.dao.NoticeMapper;
+import com.cuixx.es.personal.message.entity.Notice;
+import com.cuixx.es.sys.organization.dao.DeptMapper;
+import com.cuixx.es.sys.organization.entity.Dept;
+import com.cuixx.es.sys.permission.dao.DictMapper;
 import com.cuixx.es.sys.permission.dao.RoleMapper;
+import com.cuixx.es.sys.permission.entity.Dict;
 import com.cuixx.es.sys.permission.entity.Role;
+import com.cuixx.es.sys.resource.dao.MenuMapper;
+import com.cuixx.es.sys.resource.entity.Menu;
 import com.cuixx.es.sys.user.dao.UserMapper;
 import com.cuixx.es.sys.user.entity.User;
 import org.springframework.cache.annotation.Cacheable;
@@ -29,11 +41,11 @@ import java.util.Objects;
 public class ConstantFactory implements IConstantFactory {
 
     private RoleMapper roleMapper = SpringContextHolder.getBean(RoleMapper.class);
-//    private DeptMapper deptMapper = SpringContextHolder.getBean(DeptMapper.class);
-//    private DictMapper dictMapper = SpringContextHolder.getBean(DictMapper.class);
+    private DeptMapper deptMapper = SpringContextHolder.getBean(DeptMapper.class);
+    private DictMapper dictMapper = SpringContextHolder.getBean(DictMapper.class);
     private UserMapper userMapper = SpringContextHolder.getBean(UserMapper.class);
-//    private MenuMapper menuMapper = SpringContextHolder.getBean(MenuMapper.class);
-//    private NoticeMapper noticeMapper = SpringContextHolder.getBean(NoticeMapper.class);
+    private MenuMapper menuMapper = SpringContextHolder.getBean(MenuMapper.class);
+    private NoticeMapper noticeMapper = SpringContextHolder.getBean(NoticeMapper.class);
 
     public static IConstantFactory me() {
         return SpringContextHolder.getBean("constantFactory");
@@ -49,7 +61,7 @@ public class ConstantFactory implements IConstantFactory {
     public String getUserNameById(Integer userId) {
         User user = userMapper.selectById(userId);
         if (Objects.nonNull(user)) {
-            return user.getUsername();
+            return user.getName();
         }
         return "--";
     }
@@ -64,7 +76,7 @@ public class ConstantFactory implements IConstantFactory {
     public String getUserAccountById(Integer userId) {
         User user = userMapper.selectById(userId);
         if (Objects.nonNull(user)) {
-            return user.getMobilePhoneNumber();
+            return user.getAccount();
         }
         return "--";
     }
@@ -172,9 +184,7 @@ public class ConstantFactory implements IConstantFactory {
         if (ToolUtil.isEmpty(code)) {
             return "";
         } else {
-            Menu param = new Menu();
-            param.setCode(code);
-            Menu menu = menuMapper.selectOne(param);
+            Menu menu = menuMapper.selectOne(new LambdaQueryWrapper<Menu>().eq(Menu::getCode,code));
             if (menu == null) {
                 return "";
             } else {
@@ -222,15 +232,11 @@ public class ConstantFactory implements IConstantFactory {
      */
     @Override
     public String getDictsByName(String name, Integer val) {
-        Dict temp = new Dict();
-        temp.setName(name);
-        Dict dict = dictMapper.selectOne(temp);
+        Dict dict = dictMapper.selectOne(new LambdaQueryWrapper<Dict>().eq(Dict::getName,name));
         if (dict == null) {
             return "";
         } else {
-            Wrapper<Dict> wrapper = new EntityWrapper<>();
-            wrapper = wrapper.eq("pid", dict.getId());
-            List<Dict> dicts = dictMapper.selectList(wrapper);
+            List<Dict> dicts = dictMapper.selectList(new LambdaQueryWrapper<Dict>().eq(Dict::getPid,dict.getPid()));
             for (Dict item : dicts) {
                 if (item.getNum() != null && item.getNum().equals(val)) {
                     return item.getName();
@@ -272,8 +278,7 @@ public class ConstantFactory implements IConstantFactory {
         if (ToolUtil.isEmpty(id)) {
             return null;
         } else {
-            EntityWrapper<Dict> wrapper = new EntityWrapper<>();
-            List<Dict> dicts = dictMapper.selectList(wrapper.eq("pid", id));
+            List<Dict> dicts = dictMapper.selectList(new LambdaQueryWrapper<Dict>().eq(Dict::getPid,id));
             if (dicts == null || dicts.size() == 0) {
                 return null;
             } else {
@@ -295,9 +300,7 @@ public class ConstantFactory implements IConstantFactory {
      */
     @Override
     public List<Integer> getSubDeptId(Integer deptid) {
-        Wrapper<Dept> wrapper = new EntityWrapper<>();
-        wrapper = wrapper.like("pids", "%[" + deptid + "]%");
-        List<Dept> depts = this.deptMapper.selectList(wrapper);
+        List<Dept> depts = this.deptMapper.selectList(new LambdaQueryWrapper<Dept>().like(Dept::getPids,deptid));
 
         ArrayList<Integer> deptids = new ArrayList<>();
 

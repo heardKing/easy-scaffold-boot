@@ -1,43 +1,49 @@
 package com.cuixx.es.index.web.controller;
 
-//import com.cuixx.es.maintain.push.service.PushApi;
-//import com.cuixx.es.personal.calendar.service.CalendarService;
-//import com.cuixx.es.personal.message.service.MessageService;
-//import com.cuixx.es.sys.resource.entity.tmp.Menu;
-//import com.cuixx.es.sys.resource.service.ResourceService;
-//import com.cuixx.es.sys.user.entity.User;
-//import com.cuixx.es.sys.user.web.bind.annotation.CurrentUser;
+import com.cuixx.es.common.node.MenuNode;
+import com.cuixx.es.shiro.ShiroKit;
+import com.cuixx.es.sys.resource.service.IMenuService;
+import com.cuixx.es.sys.user.entity.User;
+import com.cuixx.es.sys.user.service.IUserService;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
 
-@Controller("adminIndexController")
-@RequestMapping("/admin")
+@Controller
 public class IndexController {
 
-//    @Autowired
-//    private ResourceService resourceService;
-//
-//    @Autowired
-//    private PushApi pushApi;
-//
-//    @Autowired
-//    private MessageService messageService;
-//
-//    @Autowired
-//    private CalendarService calendarService;
+    @Autowired
+    private IUserService userService;
 
+    @Autowired
+    private IMenuService menuService;
 
-    @RequestMapping(value = {"/{index:index;?.*}"}) //spring3.2.2 bug see  http://jinnianshilongnian.iteye.com/blog/1831408
-    public String index(/*@CurrentUser User user, */Model model) {
+    @GetMapping(value = "/") //spring3.2.2 bug see  http://jinnianshilongnian.iteye.com/blog/1831408
+    public String index(Model model) {
 
-//        List<Menu> menus = resourceService.findMenus(user);
-//        model.addAttribute("menus", menus);
-//
-//        pushApi.offline(user.getId());
+        //获取菜单列表
+        List<Integer> roleList = ShiroKit.getUser().getRoleList();
+        if (roleList == null || roleList.size() == 0) {
+            ShiroKit.getSubject().logout();
+            model.addAttribute("tips", "该用户没有角色，无法登陆");
+            return "front/login";
+        }
+        List<MenuNode> menus = menuService.getMenusByRoleIds(roleList);
+        List<MenuNode> titles = MenuNode.buildTitle(menus);
+//        titles = ApiMenuFilter.build(titles);
+
+        model.addAttribute("titles", titles);
+
+        //获取用户头像
+        Integer id = ShiroKit.getUser().getId();
+        User user = userService.getById(id);
+        String avatar = user.getAvatar();
+        model.addAttribute("avatar", avatar);
 
         return "admin/index/index";
     }

@@ -1,5 +1,7 @@
 package com.cuixx.es.shiro;
 
+import com.cuixx.es.common.constant.Const;
+import com.cuixx.es.common.constant.factory.ConstantFactory;
 import com.cuixx.es.common.utils.ToolUtil;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.crypto.hash.Md5Hash;

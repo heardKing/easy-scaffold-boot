@@ -19,8 +19,8 @@ public class EasyScaffoldBootApplicationTests {
 
 	@Test
 	public void contextLoads() {
-		List<User> users = userMapper.selectList(null);
-		users.forEach(System.out::println);
+		User admin = userMapper.getByAccount("admin");
+		System.out.println(admin);
 	}
 
 }

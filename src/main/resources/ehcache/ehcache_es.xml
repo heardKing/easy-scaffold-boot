@@ -31,6 +31,16 @@
            timeToIdleSeconds="0"
            statistics="true"/>
 
+    <!-- 常量缓存  没必要过期 -->
+    <cache name="CONSTANT"
+           maxEntriesLocalHeap="10000"
+           overflowToDisk="false"
+           eternal="false"
+           diskPersistent="false"
+           timeToLiveSeconds="0"
+           timeToIdleSeconds="0"
+           statistics="true"/>
+
     <!-- 系统用户授权缓存  没必要过期 -->
     <cache name="sys-authCache"
            maxEntriesLocalHeap="10000"
