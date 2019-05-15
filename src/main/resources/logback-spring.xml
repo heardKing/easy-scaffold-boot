@@ -1,99 +1,121 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-
-<configuration debug="false">
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
 
     <!--日志格式应用spring boot默认的格式，也可以自己更改-->
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <!--定义日志存放的位置，默认存放在项目启动的相对路径的目录-->
+    <springProperty scope="context" name="LOG_PATH" source="logging.path" defaultValue="app-log"/>
 
-    <!--定义日志存放的位置-->
-    <springProperty scope="context" name="log.dir" source="log.dir"
-                    defaultValue="D:\\tmp"/>
+    <!--<property name="FILE_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %5p  [%X{mdc_id}] -&#45;&#45; [%t] %-40.40logger{39} : %m%n"/>-->
+    <!--<property name="CONSOLE_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %5p  [%X{mdc_id}] -&#45;&#45; [%t] %-40.40logger{39} : %m%n"/>-->
 
     <!-- ****************************************************************************************** -->
     <!-- ****************************** 本地开发只在控制台打印日志 ************************************ -->
     <!-- ****************************************************************************************** -->
-    <springProfile name="dev">
-        <!-- 控制台 -->
+    <springProfile name="local">
+
+        <!-- 控制台输出 -->
         <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
             <encoder>
                 <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+                <charset>utf-8</charset>
             </encoder>
         </appender>
 
+        <!--默认所有的包以info-->
         <root level="info">
             <appender-ref ref="STDOUT"/>
         </root>
 
-        <!-- cache -->
-        <!--<logger name="com.cuixx.es" level="debug">-->
-            <!--<appender-ref ref="STDOUT"/>-->
-        <!--</logger>-->
-    </springProfile>
-
-    <!-- ****************************************************************************************** -->
-    <!-- ********************** 放到服务器上不管在什么环境都只在文件记录日志 **************************** -->
-    <!-- ****************************************************************************************** -->
-    <springProfile name="!dev">
-        <!-- 出错日志 appender  -->
-        <appender name="ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
-            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-                <!-- 按天回滚 daily -->
-                <!-- log.dir 在maven profile里配置 -->
-                <fileNamePattern>${log.dir}/error-%d{yyyy-MM-dd}.log</fileNamePattern>
-                <!-- 日志最大的历史 60天 -->
-                <maxHistory>60</maxHistory>
-            </rollingPolicy>
-            <encoder>
-                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger - %msg%n</pattern>
-            </encoder>
-        </appender>
-        <!-- 访问日志 appender  -->
-        <appender name="ACCESS" class="ch.qos.logback.core.rolling.RollingFileAppender">
-            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-                <!-- 按天回滚 daily -->
-                <fileNamePattern>${log.dir}/access-%d{yyyy-MM-dd}.log</fileNamePattern>
-                <!-- 日志最大的历史 60天 -->
-                <maxHistory>60</maxHistory>
-            </rollingPolicy>
-            <encoder>
-                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger - %msg%n</pattern>
-            </encoder>
-        </appender>
-
-        <!-- 访问日志 appender  -->
-        <appender name="SYS-USER" class="ch.qos.logback.core.rolling.RollingFileAppender">
-            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-                <!-- 按天回滚 daily -->
-                <fileNamePattern>${log.dir}/sys-user-%d{yyyy-MM-dd}.log</fileNamePattern>
-                <!-- 日志最大的历史 60天 -->
-                <maxHistory>60</maxHistory>
-            </rollingPolicy>
-            <encoder>
-                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger - %msg%n</pattern>
-            </encoder>
-        </appender>
-
-
-        <root level="info"/>
-        <!--<logger name="org.apache" level="debug">-->
-            <!--<appender-ref ref="STDOUT"/>-->
-        <!--</logger>-->
-
-        <!--错误日志-->
-        <logger name="es-error" level="info">
-            <appender-ref ref="ERROR"/>
-        </logger>
-        <!--访问日志-->
-        <logger name="es-access" level="info">
-            <appender-ref ref="ACCESS"/>
+        <!--各个服务的包在本地执行的时候，打开debug模式-->
+        <logger name="com.cuixx.es" level="debug" additivity="false">
+            <appender-ref ref="STDOUT"/>
         </logger>
         <!--系统用户操作日志-->
-        <logger name="es-sys-user" level="info">
-            <appender-ref ref="SYS-USER"/>
+        <logger name="sys-user" level="info">
+            <appender-ref ref="STDOUT"/>
         </logger>
     </springProfile>
 
+    <!-- ********************************************************************************************** -->
+    <!-- **** 放到服务器上不管在什么环境都只在文件记录日志，控制台（catalina.out）打印logback捕获不到的日志 **** -->
+    <!-- ********************************************************************************************** -->
+    <springProfile name="!local">
+
+        <!-- 系统日志输出 -->
+        <appender name="file_info" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${LOG_PATH}/sys-info.log</file>
+            <!-- 循环政策：基于时间创建日志文件 -->
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <!-- 日志文件名格式 -->
+                <fileNamePattern>${LOG_PATH}/sys-info.%d{yyyy-MM-dd}.log</fileNamePattern>
+                <!-- 日志最大的历史 60天 -->
+                <maxHistory>60</maxHistory>
+            </rollingPolicy>
+            <!-- 日志文件的格式 -->
+            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <pattern>${FILE_LOG_PATTERN}</pattern>
+                <charset>utf-8</charset>
+            </encoder>
+            <filter class="ch.qos.logback.classic.filter.LevelFilter">
+                <!-- 过滤的级别 -->
+                <level>INFO</level>
+                <!-- 匹配时的操作：接收（记录） -->
+                <onMatch>ACCEPT</onMatch>
+                <!-- 不匹配时的操作：拒绝（不记录） -->
+                <onMismatch>DENY</onMismatch>
+            </filter>
+        </appender>
+
+        <appender name="file_error" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${LOG_PATH}/sys-error.log</file>
+            <!-- 循环政策：基于时间创建日志文件 -->
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <!-- 日志文件名格式 -->
+                <fileNamePattern>${LOG_PATH}/sys-error.%d{yyyy-MM-dd}.log</fileNamePattern>
+                <!-- 日志最大的历史 60天 -->
+                <maxHistory>60</maxHistory>
+            </rollingPolicy>
+            <!-- 日志文件的格式 -->
+            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <pattern>${FILE_LOG_PATTERN}</pattern>
+                <charset>utf-8</charset>
+            </encoder>
+            <filter class="ch.qos.logback.classic.filter.LevelFilter">
+                <!-- 过滤的级别 -->
+                <level>ERROR</level>
+                <!-- 匹配时的操作：接收（记录） -->
+                <onMatch>ACCEPT</onMatch>
+                <!-- 不匹配时的操作：拒绝（不记录） -->
+                <onMismatch>DENY</onMismatch>
+            </filter>
+        </appender>
+
+        <!-- 用户访问日志输出  -->
+        <appender name="sys-user" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${LOG_PATH}/sys-user.log</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <!-- 按天回滚 daily -->
+                <fileNamePattern>${LOG_PATH}/sys-user.%d{yyyy-MM-dd}.log</fileNamePattern>
+                <!-- 日志最大的历史 60天 -->
+                <maxHistory>60</maxHistory>
+            </rollingPolicy>
+            <!-- 日志文件的格式 -->
+            <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                <pattern>${FILE_LOG_PATTERN}</pattern>
+                <charset>utf-8</charset>
+            </encoder>
+        </appender>
+
+        <!--记录到文件时，记录两类一类是error日志，一个是所有日志-->
+        <root level="info">
+            <!--<appender-ref ref="STDOUT"/>-->
+            <appender-ref ref="file_info"/>
+            <appender-ref ref="file_error"/>
+        </root>
+        <!--系统用户操作日志-->
+        <logger name="sys-user" level="info">
+            <appender-ref ref="sys-user"/>
+        </logger>
+    </springProfile>
 </configuration>
-
-
-
